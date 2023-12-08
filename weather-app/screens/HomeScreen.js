@@ -8,17 +8,21 @@ const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 const HomeScreen = ({ navigation }) => {
     const [forecast, setForecast] = useState([]);
+    const [forecastHourly, setForecastHourly] = useState([]);
 
     useEffect(() => {
         const fetchWeatherData = async () => {
-            const city = 'Boston'; 
+            const city = 'Boston';
             const url = `${BASE_URL}/forecast?q=${city}&units=metric&appid=${API_KEY}`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
+                // console.log(data.list); // 打印原始数据以检查
                 const processedData = processForecastData(data.list);
+                // console.log(processedData); // 打印处理后的数据以检查
                 setForecast(processedData);
+                setForecastHourly(data.list);
             } catch (error) {
                 console.error(error);
             }
@@ -50,7 +54,15 @@ const HomeScreen = ({ navigation }) => {
     };
 
     const handleCardPress = (day) => {
-        navigation.navigate('Detail', { day });
+        const selectedDate = new Date(day.dt * 1000).toDateString(); // 被选择的日期（年月日）
+
+        console.log(selectedDate);
+        
+        const dayData = forecastHourly.filter(item => 
+            new Date(item.dt * 1000).toDateString() === selectedDate // 比较每个时间点的日期是否与 selectedDate 相同
+          );
+        // console.log(dayData);
+        navigation.navigate('Detail', { dayData });
     };
 
     return (
